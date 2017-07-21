@@ -1,0 +1,104 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div id="pie"></div>
+    <script>
+      const PieChart = {
+        //MODIFY AT YOUR OWN RISK
+        _calculateSectors: function(data) {
+          let sectors = [],
+            colors = ["#47ACB1", "#F26522", "#FFCD33", "#943F7F", "#F9AA7B"],
+            l = data.size / 2,
+            a = 0, // Angle
+            aRad = 0, // Angle in Rad
+            z = 0, // Size z
+            x = 0, // Side x
+            y = 0, // Side y
+            X = 0, // SVG X coordinate
+            Y = 0, // SVG Y coordinate
+            R = 0, // Rotation
+            arcSweep = 0,
+            aCalc = 0;
+          data.sectors.map(function(item, key) {
+              a = 360 * item.percentage;
+              aCalc = (a > 180) ? 360 - a : a;
+              aRad = aCalc * Math.PI / 180;
+              z = Math.sqrt(2 * l * l - (2 * l * l * Math.cos(aRad)));
+              if (aCalc <= 90) {
+                  x = l * Math.sin(aRad);
+              } else {
+                  x = l * Math.sin((180 - aCalc) * Math.PI / 180);
+              }
+
+              y = Math.sqrt(z * z - x * x);
+              Y = y;
+
+              if (a <= 180) {
+                  X = l + x;
+                  arcSweep = 0;
+              } else {
+                  X = l - x;
+                  arcSweep = 1;
+              }
+
+              sectors.push({
+                  percentage: item.percentage,
+                  label: item.label,
+                  color: item.color || colors[key],
+                  arcSweep: arcSweep,
+                  L: l,
+                  X: X,
+                  Y: Y,
+                  R: R
+              });
+
+              R = R + a;
+          });
+          return sectors;
+        },
+        getChart(data) {
+          let sectors = this._calculateSectors(data),
+              path_body = sectors.map(sector => `<path fill="${sector.color}" d="${'M' + sector.L + ',' + sector.L + ' L' + sector.L + ',0 A' + sector.L + ',' + sector.L + ' 0 ' + sector.arcSweep + ',1 ' + sector.X + ', ' + sector.Y + ' z'}" transform="${'rotate(' + sector.R + ', '+ sector.L+', '+ sector.L+')'}"></path>`).join(""),
+              table_body = sectors.map((item, index) => {
+                if((index % 2) === 0) {
+                  return `
+                  <tr>
+                    <td style="text-align: center; width: 50%;">
+                      <div class="piebox" style="background: ${item.color}">${(item.percentage*100).toFixed(0)}%</div>
+                      <div>${item.label}</div>
+                    </td>
+                  `;
+                } else {
+                  return `<td style="text-align: center; width: 50%;">
+                      <div class = "piebox" style = "background: ${item.color}" >${(item.percentage*100).toFixed(0)}%</div> 
+                      <div> ${item.label}</div> 
+                    </td>
+                  </tr>`;
+                }
+              }).join(""),
+              table = `<table class="pielegend" style="width: 100%; padding: 10px 5%;"><tbody>${table_body}</tbody></table>`;
+        return `<div class="piecontainer" style="display: flex; flex-direction: column; align-items: center;">
+                <svg class="pie" width="${data.size}" height="${data.size}">
+                  ${path_body}
+                  <circle cx="${data.size * 0.5}" cy="${data.size * 0.5}" fill="#FFF" r="${data.size * 0.3}"></circle>
+                </svg>
+                ${table}
+              </div>`;
+        }
+      }
+
+      /* 
+      Returns string of html to be put into description of card 
+      The percentage collectively should sum to 1.
+      The size is the size of the pie in pixels
+      */
+      document.getElementById("pie").innerHTML = PieChart.getChart({sectors: [
+        {percentage: 0.78, label: "Nitrogen", color: "#47ACB1"}, 
+        {percentage: 0.21, label: "Oxygen", color: "#F26522"},
+        {percentage: 0.09, label: "Argon", color: "#FFCD33"},
+        {percentage: 0.01, label: "Carbon dioxide", color: "#943F7F"}
+      ], size: 200});
+    </script>
+  </body>
+</html>
