@@ -1,0 +1,72 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div id="bar">
+    </div>
+    <script>
+      const BarChart = {
+        getChart(data, width, height) {
+          width = width || "100%";
+          height = height || 230;
+          height = height - 20;
+          let colors = ["red", "green", "orange", "yellow"],
+            _values = data.map(item => item.value),
+            negativeDataPoints = data.map(item => item.value < 0),
+            maxVal = Math.max.apply(null, _values),
+            tempGap = 0,
+            axis = "", dataPoints = "";
+          ;
+          const hasNegative = !!negativeDataPoints.length, 
+                negativeDisplay = hasNegative === true ? "flex" : "none",
+                barWidth = 25,
+                barGap = (100 - (barWidth * data.length)) / (data.length + 1),
+                drawableHeight = height - 0,
+                scaleValue = (drawableHeight / maxVal);
+         let bars = data.map((item, index) => {
+            tempGap = index === 0 ? barGap : (tempGap+barWidth+barGap);
+            axis += `<div 
+              class="axis-label" 
+              style="
+                left: ${tempGap}%; 
+                height: ${20}px; 
+                position: absolute; 
+                bottom: 0; 
+                width: ${barWidth}%;
+                text-align: center;">${item.axisLabel}</div>`;
+           dataPoints += `<div 
+              class="label" 
+              style="
+                left: ${tempGap}%; 
+                height: ${20}px; 
+                position: absolute; 
+                bottom: ${item.value*scaleValue}px; 
+                width: ${barWidth}%;
+                text-align: center;">${item.label}</div>`;
+            return `<div 
+              class="bar" 
+              style="
+                left: ${tempGap}%; 
+                height: ${item.value*scaleValue}px; 
+                background: ${item.color}; 
+                position: absolute; 
+                bottom: 0; 
+                width: ${barWidth}%;">
+            </div>`}).join("");
+          return `
+            <div class="barContainer" style="background: #fff; position: relative; height: 230px;">
+              ${dataPoints}
+              ${bars}
+            </div>
+            <div class="axis" style="border-top: 1px solid #eee; height: 20px; background: #fff; position: relative;">${axis}</div>
+          `;
+        }
+      }
+      const data = [
+        {value: 20, color: "yellow", label: "20 points", axisLabel: "1 year"}, 
+        {value: 50, color: "green", label: "50 points", axisLabel: "3 year"}, 
+        {value: 30, color: "red", label: "30 points", axisLabel: "5 year"}]
+      document.getElementById("bar").innerHTML = BarChart.getChart(data);
+    </script>
+  </body>
+</html>
