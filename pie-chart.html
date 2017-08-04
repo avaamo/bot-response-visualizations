@@ -22,7 +22,7 @@
             aCalc = 0;
           data.sectors.map(function(item, key) {
               a = 360 * item.percentage;
-              aCalc = (a > 180) ? 360 - a : a;
+              aCalc = (a > 180) ? (a == 360 ? 0.036 : 360) - a : a;
               aRad = aCalc * Math.PI / 180;
               z = Math.sqrt(2 * l * l - (2 * l * l * Math.cos(aRad)));
               if (aCalc <= 90) {
